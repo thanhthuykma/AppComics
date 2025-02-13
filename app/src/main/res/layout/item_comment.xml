@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="10dp"
+    android:background="@drawable/comment_item_background"
+    android:layout_marginBottom="8dp">
+
+    <!-- Tên người dùng -->
+    <TextView
+        android:id="@+id/tv_username"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Username"
+        android:textSize="14sp"
+        android:textColor="#F7841E"
+        android:layout_marginBottom="4dp"/>
+
+    <!-- Nội dung bình luận -->
+    <TextView
+        android:id="@+id/tv_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nội dung bình luận..."
+        android:textSize="16sp"
+        android:textColor="@android:color/black"
+        android:layout_marginBottom="8dp"/>
+
+    <!-- Hành động like và trả lời bình luận -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:layout_marginTop="4dp">
+
+        <!-- Nút like -->
+        <ImageButton
+            android:id="@+id/btn_like"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/baseline_thumb_up_off_alt_24"
+            android:contentDescription="Like"
+            android:background="@null"
+            />
+
+        <!-- Số lượt thích -->
+        <TextView
+            android:id="@+id/tv_like_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:layout_marginLeft="8dp"/>
+
+        <!-- Nút Trả lời -->
+        <ImageButton
+            android:id="@+id/btn_reply"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Trả lời"
+            android:textColor="#F7841E"
+            android:background="@drawable/baseline_reply_24"
+            android:layout_marginLeft="16dp"/> <!-- Thêm khoảng cách giữa nút trả lời và số lượt thích -->
+
+    </LinearLayout>
+
+    <!-- EditText để nhập câu trả lời -->
+    <LinearLayout
+        android:id="@+id/ll_reply_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:padding="8dp">
+
+        <EditText
+            android:id="@+id/et_reply_input"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Nhập câu trả lời..."
+            android:textColor="@color/black"
+            android:textColorHint="@color/black"
+            android:background="@drawable/edit_text_background"
+            android:padding="8dp"
+            android:inputType="text" />
+
+        <Button
+            android:id="@+id/btn_submit_reply"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Gửi"
+            android:backgroundTint="#F7841E"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+    <!-- Danh sách các câu trả lời (nếu có) -->
+    <LinearLayout
+        android:id="@+id/ll_replies"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingLeft="16dp"
+        android:paddingTop="8dp">
+        <!-- Các câu trả lời sẽ được hiển thị ở đây -->
+    </LinearLayout>
+
+</LinearLayout>
+

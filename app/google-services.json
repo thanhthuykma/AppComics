@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "230252037760",
+    "project_id": "sign-in-6494d",
+    "storage_bucket": "sign-in-6494d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:230252037760:android:7966277bd66998a6154865",
+        "android_client_info": {
+          "package_name": "com.example.appcomics"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChgSQzangFdq9OomEJOntY_962vN37JUI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

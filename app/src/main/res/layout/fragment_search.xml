@@ -1,0 +1,72 @@
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="0dp"
+    android:backgroundTint="@color/white"
+    app:cardElevation="8dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    tools:context=".Fragment.SearchFragment">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- TextView luôn ở trên cùng -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Chọn thể loại"
+            android:textSize="27dp"
+            android:textColor="@color/black"
+            android:textStyle="bold" />
+
+        <!-- ScrollView chứa RecyclerView -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fillViewport="true"
+            android:layout_weight="1">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_options"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+        </ScrollView>
+        <!-- TextView thay cho nút Tìm kiếm -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp">
+        <TextView
+            android:id="@+id/apply_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TÌM KIẾM"
+            android:textSize="20sp"
+            android:textColor="#cf0911"
+            android:textStyle="bold"
+            android:clickable="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="90dp"
+            />
+
+        <!-- TextView thay cho nút Hủy -->
+        <TextView
+            android:id="@+id/cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="HỦY"
+            android:textSize="20sp"
+            android:textColor="#cf0911"
+            android:textStyle="bold"
+            android:clickable="true"
+            android:layout_gravity="end"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="35dp"
+            />
+        </RelativeLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
