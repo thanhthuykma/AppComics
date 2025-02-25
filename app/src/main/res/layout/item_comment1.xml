@@ -76,28 +76,6 @@
             />
 
     </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        >
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/tv_xemreply"
-            android:text="Xem tất cả phản hồi..."
-            android:textColor="@color/black"
-            android:visibility="invisible"
-            ></TextView>
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_replycomments"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:padding="8dp"
-            android:visibility="invisible"
-            />
-    </LinearLayout>
 
     <!-- EditText để nhập câu trả lời -->
     <LinearLayout
@@ -128,17 +106,6 @@
             android:text="Gửi"
             android:backgroundTint="#F7841E"
             android:textColor="@color/white" />
-    </LinearLayout>
-
-    <!-- Danh sách các câu trả lời (nếu có) -->
-    <LinearLayout
-        android:id="@+id/ll_replies"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingLeft="16dp"
-        android:paddingTop="8dp">
-        <!-- Các câu trả lời sẽ được hiển thị ở đây -->
     </LinearLayout>
 
 </LinearLayout>

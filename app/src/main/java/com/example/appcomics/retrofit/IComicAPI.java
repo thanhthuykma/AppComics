@@ -4,9 +4,11 @@ import com.example.appcomics.Model.Author;
 import com.example.appcomics.Model.Banner;
 import com.example.appcomics.Model.Catergory;
 import com.example.appcomics.Model.Chapter;
+import com.example.appcomics.Model.ChapterContent;
 import com.example.appcomics.Model.ChapterCountResponse;
 import com.example.appcomics.Model.CategoryResponse;
 import com.example.appcomics.Model.Comic;
+import com.example.appcomics.Model.Comic1;
 import com.example.appcomics.Model.ComicCountResponse;
 import com.example.appcomics.Model.Comment;
 import com.example.appcomics.Model.Download;
@@ -18,6 +20,7 @@ import com.example.appcomics.Model.Links;
 import com.example.appcomics.Model.LoginResponse;
 import com.example.appcomics.Model.RefreshTokenResponse;
 import com.example.appcomics.Model.RegisterResponse;
+import com.example.appcomics.Model.ReplyComment;
 import com.example.appcomics.Model.ThongTin;
 import com.example.appcomics.Model.VerifyCodeRequest;
 import com.example.appcomics.Model.ViewsResponse;
@@ -102,6 +105,8 @@ public interface IComicAPI {
     //tìm kiếm truyện
     @GET("/search")
     Call<List<Comic>> searchComic(@Query("keyword") String keyword);
+    @GET("/searchdialog")
+    Call<List<Comic1>> searchComic1(@Query("keyword") String keyword);
 
     @POST("/forgot-password")
     Call<ResponseBody> forgotPassword(@Body ForgotPasswordRequest request);
@@ -109,18 +114,24 @@ public interface IComicAPI {
     @POST("/verify-code")
     Call<ResponseBody> verifyCode(@Body VerifyCodeRequest request);
     // API lấy tất cả bình luận của truyện theo comic_id
-    @GET("/comments/{comic_id}")
-    Call<List<Comment>> getCommentsByComicId(@Path("comic_id") int comicId);
+    @GET("/comments/{manga_id}")
+    Call<List<Comment>> getCommentsByComicId(@Path("manga_id") int comicId);
+    //API lấy trả lời bình luận
+    @GET("/replycom/{manga_id}")
+    Call<List<ReplyComment>> getRepCom(@Path("manga_id") int mangaid);
     // API thêm một bình luận mới
     @POST("/comments")
     Call<Comment> addComment(@Body Comment comment);
+    //API xóa bình luận
+    @DELETE("/deletecom/{comid}")
+    Call<Void> deleteComment(@Path("comid") int comid);
     // API thích một bình luận
     @PATCH("/comments/{id}/like")
     Call<Void> likeComment(@Path("id") int commentId);
+    //API dislike
+    @PATCH("/comments/{id}/dislike")
+    Call<Void> dislikeComment(@Path("id") int commentId);
 
-    // API thêm câu trả lời cho bình luận
-    @GET("/comments/{manga_id}")
-    Call<List<Comment>> getComments(@Path("manga_id") int mangaId);
     //Lấy tên tác giả
     @GET("/tacgia/{mangaid}")
     Call<Author> tacgia(@Path("mangaid") int mangaid);
@@ -130,6 +141,9 @@ public interface IComicAPI {
     //Lấy thể loại
     @GET("/theloai/{mangaid}")
     Call<CategoryResponse> getTheLoai(@Path("mangaid") int mangaid);
+    //API lấy nội dung chương
+    @GET("/chaptercontent/{chapterid}")
+    Call<ChapterContent> getChapcontent(@Path("chapterid") int chapterid);
 
     //Kiểm tra username
     @POST("/user")

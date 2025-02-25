@@ -8,6 +8,10 @@ import android.os.Bundle;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
+
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,12 +21,15 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 import com.example.appcomics.Adapter.ComicAdapter;
+import com.example.appcomics.Adapter.SearchAdapter;
 import com.example.appcomics.Adapter.SliderAdapter;
 import com.example.appcomics.Model.Banner;
 import com.example.appcomics.Model.Comic;
+import com.example.appcomics.Model.Comic1;
 import com.example.appcomics.Model.ComicCountResponse;
 import com.example.appcomics.R;
 import com.example.appcomics.retrofit.IComicAPI;
@@ -56,6 +63,8 @@ public class HomeFragment extends Fragment {
     private String timkiem;
     private TextView timkiemcomic;
     private TextView huy;
+    private RecyclerView searchrecycler;
+    private AlertDialog dialog;
 
 
     public HomeFragment() {
@@ -87,9 +96,32 @@ public class HomeFragment extends Fragment {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                 View dialogView = getLayoutInflater().inflate(R.layout.dialog_timkiem,null);
                 EditText timkiem = dialogView.findViewById(R.id.comicBox);
+                searchrecycler = dialogView.findViewById(R.id.recyclerViewSearchResults);
+                searchrecycler.setLayoutManager(new LinearLayoutManager(getContext()));
                 Button ok = dialogView.findViewById(R.id.btnReset);
                 builder.setView(dialogView);
-                AlertDialog dialog = builder.create();
+                dialog = builder.create();
+
+                timkiem.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        String query = s.toString().trim();
+                        if (!query.isEmpty()) {
+                            searchComics1(query);
+                        }
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+
+                    }
+                });
 
                 ok.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -178,6 +210,30 @@ public class HomeFragment extends Fragment {
             public void onFailure(Call<List<Comic>> call, Throwable t) {
                 Toast.makeText(getContext(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
+        });
+    }
+    //search
+    public void searchComics1(String charac){
+        iComicAPI.searchComic1(charac).enqueue(new Callback<List<Comic1>>() {
+            @Override
+            public void onResponse(Call<List<Comic1>> call, Response<List<Comic1>> response) {
+                if (response.isSuccessful()){
+                    List<Comic1> comic1List = response.body();
+                    SearchAdapter searchAdapter = new SearchAdapter(dialog.getContext(),comic1List);
+                    searchrecycler.setAdapter(searchAdapter);
+                    Log.d("API_RESPONSE", "Số lượng truyện: " + comic1List.size());
+
+                } else {
+                    Log.e("API_ERROR", "Phản hồi không hợp lệ: " + response.errorBody());
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<List<Comic1>> call, Throwable t) {
+
+            }
+
         });
     }
 

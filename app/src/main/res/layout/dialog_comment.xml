@@ -4,33 +4,26 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/white">
-
-    <!-- Toolbar hoặc header -->
-    <LinearLayout
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:gravity="center_vertical">
-
-        <ImageButton
-            android:id="@+id/btn_back"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/baseline_arrow_back_ios_24"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back" />
+        android:layout_height="50dp"
+        android:background="#F7841E"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        >
 
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:text="Bình luận"
+            android:textAlignment="center"
             android:gravity="center"
+            android:textSize="20dp"
             android:textStyle="bold"
-            android:textSize="18sp" />
-    </LinearLayout>
-
-    <!-- Danh sách bình luận -->
+            android:textColor="@color/white"
+            ></TextView>
+    </androidx.appcompat.widget.Toolbar>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_comments"
         android:layout_width="match_parent"
@@ -51,12 +44,12 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="Viết bình luận..."
-            android:textColor="@color/black"
-            android:textColorHint="@color/black"
             android:background="@drawable/edit_text_background"
+            android:hint="Viết bình luận..."
+            android:inputType="text"
             android:padding="8dp"
-            android:inputType="text" />
+            android:textColor="@color/black"
+            android:textColorHint="@color/black" />
 
         <Button
             android:id="@+id/btn_submit_comment"

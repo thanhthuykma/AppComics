@@ -87,7 +87,7 @@ public class ChapterActivity extends AppCompatActivity {
         btncomment = findViewById(R.id.btn_comment);
 
         //Comment
-        /*btncomment.setOnClickListener(new View.OnClickListener() {
+        btncomment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent =new Intent(ChapterActivity.this,CommentActivity.class);
@@ -95,7 +95,7 @@ public class ChapterActivity extends AppCompatActivity {
                 intent.putExtra("username",username);
                 startActivity(intent);
             }
-        });*/
+        });
 
         //Dowload truyện
         buttondownload.setOnClickListener(new View.OnClickListener() {

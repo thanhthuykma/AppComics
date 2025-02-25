@@ -74,6 +74,8 @@ dependencies {
     //google sign-in
     implementation("com.google.android.gms:play-services-auth:20.7.0") // Thêm Google Sign-In SDK
     implementation ("com.google.firebase:firebase-auth:21.1.0")
+    //lưu ảnh
+    implementation ("com.google.firebase:firebase-storage:20.2.1")
 
     implementation ("androidx.biometric:biometric:1.2.0-alpha05")
     //captcha

@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -36,6 +37,9 @@ public class StoryIntroActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private IComicAPI iComicAPI;
     private int mangaid;
+    private Button btndoc;
+    private String username,name;
+    private String imagehistory;
 
 
     @Override
@@ -60,8 +64,11 @@ public class StoryIntroActivity extends AppCompatActivity {
         // Lấy dữ liệu từ Intent
         Intent intent = getIntent();
         if (intent != null) {
-            String name = intent.getStringExtra("name");
+            name = intent.getStringExtra("name");
             mangaid = intent.getIntExtra("mangaid",1);
+            username = intent.getStringExtra("username");
+            imagehistory = intent.getStringExtra("imagehistory");
+
             iComicAPI = RetrofitClient.getClient().create(IComicAPI.class);
             tacgia(mangaid);
             thongtin(mangaid);
@@ -77,7 +84,19 @@ public class StoryIntroActivity extends AppCompatActivity {
                     .load(imageUrl)
                     .into(imgStoryCover);
         }
-
+        btndoc= findViewById(R.id.btn_doctruyen);
+        btndoc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent1 = new Intent(StoryIntroActivity.this, ChapterActivity.class );
+                intent1.putExtra("mangaid",mangaid);
+                intent1.putExtra("name",name);
+                intent1.putExtra("username",username);
+                intent1.putExtra("imagehistory",imagehistory);
+                intent1.putExtra("source","comic");
+                startActivity(intent1);
+            }
+        });
     }
     // Xử lý nút back trên toolbar
     @Override
