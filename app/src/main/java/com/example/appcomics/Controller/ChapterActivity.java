@@ -13,6 +13,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
@@ -113,15 +114,6 @@ public class ChapterActivity extends AppCompatActivity {
             public void onClick(View v) {
                 downloadChapter(mangaid);
                 insertDownload(username,name,mangaid,historyimage,views,tacgia);
-                /*int mangaid = 1;  // Thay bằng giá trị thực tế
-                int chapterid = 1;  // Thay bằng giá trị thực tế
-                String chapterTitle = "Chapter 1: Hoa Tay";  // Thay bằng giá trị thực tế
-                String content = "Chú Đàn bảo tôi:\n- Con xòe tay...";  // Thay bằng giá trị thực tế
-
-                // Thêm thông tin chương vào cơ sở dữ liệu
-                dbHelper.addDownload(mangaid, chapterid, chapterTitle, content);
-                insertDownload(username,name,mangaid,historyimage);
-                Toast.makeText(ChapterActivity.this, "Truyện đã tải về", Toast.LENGTH_SHORT).show();*/
             }
         });
 
@@ -179,7 +171,7 @@ public class ChapterActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
     //API tải các chapter
-    private void downloadChapter(int mangaid){
+    private void downloadChapter(int mangaid) {
         iComicAPI.getLinkDownload(mangaid).enqueue(new Callback<List<ChapContent>>() {
             @Override
             public void onResponse(Call<List<ChapContent>> call, Response<List<ChapContent>> response) {
@@ -195,15 +187,25 @@ public class ChapterActivity extends AppCompatActivity {
                             String chapterTitle = chapter.getChapter_title();  // Giả sử ChapContent có phương thức getChapterTitle()
                             String content = chapter.getContent();  // Giả sử ChapContent có phương thức getContent()
 
-                            // Chèn thông tin chương vào cơ sở dữ liệu SQLite
-                            ContentValues values = new ContentValues();
-                            values.put(DatabaseHelper.COLUMN_MANGAID, mangaid);
-                            values.put(DatabaseHelper.COLUMN_CHAPTERID, chapterid);
-                            values.put(DatabaseHelper.COLUMN_CHAPTER_TITLE, chapterTitle);
-                            values.put(DatabaseHelper.COLUMN_CONTENT, content);
+                            // Kiểm tra xem chương đã tồn tại chưa
+                            String checkQuery = "SELECT * FROM " + DatabaseHelper.TABLE_DOWNLOADS +
+                                    " WHERE " + DatabaseHelper.COLUMN_MANGAID + " = ? AND " +
+                                    DatabaseHelper.COLUMN_CHAPTERID + " = ?";
+                            Cursor cursor = db.rawQuery(checkQuery, new String[]{String.valueOf(mangaid), String.valueOf(chapterid)});
 
-                            // Chèn vào bảng download
-                            db.insert(DatabaseHelper.TABLE_DOWNLOADS, null, values);
+                            if (cursor.getCount() == 0) {  // Nếu không có chương này trong cơ sở dữ liệu
+                                // Chèn thông tin chương vào cơ sở dữ liệu SQLite
+                                ContentValues values = new ContentValues();
+                                values.put(DatabaseHelper.COLUMN_MANGAID, mangaid);
+                                values.put(DatabaseHelper.COLUMN_CHAPTERID, chapterid);
+                                values.put(DatabaseHelper.COLUMN_CHAPTER_TITLE, chapterTitle);
+                                values.put(DatabaseHelper.COLUMN_CONTENT, content);
+
+                                // Chèn vào bảng download
+                                db.insert(DatabaseHelper.TABLE_DOWNLOADS, null, values);
+                            }
+
+                            cursor.close();
                         }
 
                         // Hiển thị thông báo cho người dùng
@@ -213,16 +215,16 @@ public class ChapterActivity extends AppCompatActivity {
                     // Xử lý khi response không thành công
                     runOnUiThread(() -> Toast.makeText(ChapterActivity.this, "Tải chương không thành công", Toast.LENGTH_SHORT).show());
                 }
-
-                }
-
+            }
 
             @Override
             public void onFailure(Call<List<ChapContent>> call, Throwable t) {
-                runOnUiThread(() -> Toast.makeText(ChapterActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show());
+                // Xử lý khi có lỗi trong quá trình gọi API
+                runOnUiThread(() -> Toast.makeText(ChapterActivity.this, "Lỗi tải dữ liệu", Toast.LENGTH_SHORT).show());
             }
         });
     }
+
 
     //Gọi API đếm số chương
     private void getChapsize(int mangaid) {

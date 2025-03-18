@@ -87,6 +87,9 @@ public interface IComicAPI {
     //Lấy danh sách download
     @GET("/downloadhis/{username}")
     Call<List<DownLoadHIis>> getDownload(@Path("username") String username);
+    //API xoa khoi bang download
+    @DELETE("/delete/{mangaid}")
+    Call<Void> deleteDownload(@Path("mangaid") int mangaid);
     //Lấy views
     @GET("/views/{id}")
     Call<List<ViewsResponse>> getViews(@Path("id") int id);

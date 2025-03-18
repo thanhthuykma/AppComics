@@ -2,8 +2,14 @@ package com.example.appcomics.SQLite;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import com.example.appcomics.Model.ChapContent;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -50,14 +56,43 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Phương thức để thêm một chapter vào bảng downloads
     public void addDownload(int mangaid, int chapterid, String chapterTitle, String content) {
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_MANGAID, mangaid);
-        values.put(COLUMN_CHAPTERID, chapterid);
-        values.put(COLUMN_CHAPTER_TITLE, chapterTitle);
-        values.put(COLUMN_CONTENT, content);
 
-        // Chèn dòng mới vào bảng
-        db.insert(TABLE_DOWNLOADS, null, values);
+        // Kiểm tra xem chương đã tồn tại chưa
+        String checkQuery = "SELECT * FROM " + TABLE_DOWNLOADS + " WHERE " + COLUMN_MANGAID + " = ? AND " + COLUMN_CHAPTERID + " = ?";
+        Cursor cursor = db.rawQuery(checkQuery, new String[]{String.valueOf(mangaid), String.valueOf(chapterid)});
+
+        if (cursor.getCount() == 0) {
+            // Nếu chưa tồn tại, thêm chương mới
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_MANGAID, mangaid);
+            values.put(COLUMN_CHAPTERID, chapterid);
+            values.put(COLUMN_CHAPTER_TITLE, chapterTitle);
+            values.put(COLUMN_CONTENT, content);
+            db.insert(TABLE_DOWNLOADS, null, values);
+        }
+        cursor.close();
         db.close();
+    }
+
+    public List<ChapContent> getDownloadedChapters(int mangaid) {
+        List<ChapContent> chapters = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_DOWNLOADS,
+                new String[]{COLUMN_CHAPTERID, COLUMN_CHAPTER_TITLE, COLUMN_CONTENT},
+                COLUMN_MANGAID + " = ?",
+                new String[]{String.valueOf(mangaid)},
+                null, null, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                int chapterId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_CHAPTERID));
+                String chapterTitle = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CHAPTER_TITLE));
+                String content = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTENT));
+                chapters.add(new ChapContent(chapterId, chapterTitle, content));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return chapters;
     }
 }

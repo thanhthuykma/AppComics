@@ -36,9 +36,16 @@
             <View
                 android:background="@drawable/horizontal_line"
                 android:layout_gravity="center_vertical"
-                android:layout_width="150dp"
+                android:layout_width="100dp"
                 android:layout_weight="2"
                 android:layout_height="3dp"/>
+            <ImageButton
+                android:id="@+id/btn_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/baseline_delete_24"
+                android:backgroundTint="@color/black"
+                ></ImageButton>
         </androidx.appcompat.widget.LinearLayoutCompat>
     </LinearLayout>
     <androidx.recyclerview.widget.RecyclerView
