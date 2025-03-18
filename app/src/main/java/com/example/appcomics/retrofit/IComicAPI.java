@@ -3,6 +3,7 @@ package com.example.appcomics.retrofit;
 import com.example.appcomics.Model.Author;
 import com.example.appcomics.Model.Banner;
 import com.example.appcomics.Model.Catergory;
+import com.example.appcomics.Model.ChapContent;
 import com.example.appcomics.Model.Chapter;
 import com.example.appcomics.Model.ChapterContent;
 import com.example.appcomics.Model.ChapterCountResponse;
@@ -11,6 +12,7 @@ import com.example.appcomics.Model.Comic;
 import com.example.appcomics.Model.Comic1;
 import com.example.appcomics.Model.ComicCountResponse;
 import com.example.appcomics.Model.Comment;
+import com.example.appcomics.Model.DownLoadHIis;
 import com.example.appcomics.Model.Download;
 import com.example.appcomics.Model.Favourite;
 import com.example.appcomics.Model.ForgotPasswordRequest;
@@ -84,7 +86,7 @@ public interface IComicAPI {
     Call<List<History>> getHistory(@Path("username") String username);
     //Lấy danh sách download
     @GET("/downloadhis/{username}")
-    Call<List<History>> getDownload(@Path("username") String username);
+    Call<List<DownLoadHIis>> getDownload(@Path("username") String username);
     //Lấy views
     @GET("/views/{id}")
     Call<List<ViewsResponse>> getViews(@Path("id") int id);
@@ -100,7 +102,7 @@ public interface IComicAPI {
     Call<List<Comic>> getComicsbyId(@Path("id") int id);
     //Lấy link tải truyện
     @GET("/download/{mangaid}")
-    Call<List<LinkResponse>> getLinkDownload(@Path("mangaid") int mangaid);
+    Call<List<ChapContent>> getLinkDownload(@Path("mangaid") int mangaid);
 
     //tìm kiếm truyện
     @GET("/search")

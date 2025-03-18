@@ -38,8 +38,10 @@ public class StoryIntroActivity extends AppCompatActivity {
     private IComicAPI iComicAPI;
     private int mangaid;
     private Button btndoc;
+    private String tacgia;
     private String username,name;
     private String imagehistory;
+    private int views;
 
 
     @Override
@@ -68,6 +70,7 @@ public class StoryIntroActivity extends AppCompatActivity {
             mangaid = intent.getIntExtra("mangaid",1);
             username = intent.getStringExtra("username");
             imagehistory = intent.getStringExtra("imagehistory");
+            views = intent.getIntExtra("views",0);
 
             iComicAPI = RetrofitClient.getClient().create(IComicAPI.class);
             tacgia(mangaid);
@@ -93,6 +96,8 @@ public class StoryIntroActivity extends AppCompatActivity {
                 intent1.putExtra("name",name);
                 intent1.putExtra("username",username);
                 intent1.putExtra("imagehistory",imagehistory);
+                intent1.putExtra("views",views);
+                intent1.putExtra("tacgia",tacgia);
                 intent1.putExtra("source","comic");
                 startActivity(intent1);
             }
@@ -113,7 +118,7 @@ public class StoryIntroActivity extends AppCompatActivity {
             public void onResponse(Call<Author> call, Response<Author> response) {
                 if ((response.isSuccessful())){
                     Author author = response.body();
-                    String tacgia = author.getTacgia();
+                    tacgia = author.getTacgia();
                     tvStoryAuthor.setText("Tác giả: "+tacgia);
                 }
             }

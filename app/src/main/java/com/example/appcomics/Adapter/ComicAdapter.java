@@ -59,6 +59,7 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHol
                 intent.putExtra("name",comic.getName());
                 intent.putExtra("username",username);
                 intent.putExtra("imagehistory",comic.getImage());
+                intent.putExtra("views",comic.getViews());
                 intent.putExtra("source","comic");
                 context.startActivity(intent);
             }

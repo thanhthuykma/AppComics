@@ -9,9 +9,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -21,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.appcomics.Adapter.ChapterAdapter;
+import com.example.appcomics.Model.ChapContent;
 import com.example.appcomics.Model.Chapter;
 import com.example.appcomics.Model.Download;
 import com.example.appcomics.Model.Favourite;
@@ -28,6 +31,7 @@ import com.example.appcomics.Model.History;
 import com.example.appcomics.Model.LinkResponse;
 import com.example.appcomics.Model.PdfCreator;
 import com.example.appcomics.R;
+import com.example.appcomics.SQLite.DatabaseHelper;
 import com.example.appcomics.retrofit.IComicAPI;
 import com.example.appcomics.retrofit.RetrofitClient;
 
@@ -50,17 +54,21 @@ public class ChapterActivity extends AppCompatActivity {
     private String username;
     private String name;
     private String historyimage;
+    private String tacgia;
+    private int views;
     private ImageButton buttondownload;
     private ImageButton buttonfav;
     private ImageButton btncomment;
     private TextView text_chapter;
     private List<String> linkDownload = new ArrayList<>();
+    private DatabaseHelper dbHelper;
     private static final int REQUEST_CODE_PERMISSION = 100;//người dùng đồng ý truy cập bộ nhớ
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chapter);
+        dbHelper = new DatabaseHelper(this);
 
         Intent intent = getIntent();
         String source = intent.getStringExtra("source");
@@ -69,6 +77,8 @@ public class ChapterActivity extends AppCompatActivity {
             name = intent.getStringExtra("name");
             username = intent.getStringExtra("username");
             historyimage = intent.getStringExtra("imagehistory");
+            tacgia = intent.getStringExtra("tacgia");
+            views = intent.getIntExtra("views",0);
         } else if (source.equals("history")) {
             mangaid = intent.getIntExtra("mangaidhis", 0);
             name = intent.getStringExtra("namehis");
@@ -101,13 +111,17 @@ public class ChapterActivity extends AppCompatActivity {
         buttondownload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Kiểm tra quyền và yêu cầu
-                if (ContextCompat.checkSelfPermission(ChapterActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(ChapterActivity.this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE_PERMISSION);
-                } else {
-                    // Nếu quyền đã được cấp, lấy liên kết tải xuống
-                    getLinkDownload(mangaid);
-                }
+                downloadChapter(mangaid);
+                insertDownload(username,name,mangaid,historyimage,views,tacgia);
+                /*int mangaid = 1;  // Thay bằng giá trị thực tế
+                int chapterid = 1;  // Thay bằng giá trị thực tế
+                String chapterTitle = "Chapter 1: Hoa Tay";  // Thay bằng giá trị thực tế
+                String content = "Chú Đàn bảo tôi:\n- Con xòe tay...";  // Thay bằng giá trị thực tế
+
+                // Thêm thông tin chương vào cơ sở dữ liệu
+                dbHelper.addDownload(mangaid, chapterid, chapterTitle, content);
+                insertDownload(username,name,mangaid,historyimage);
+                Toast.makeText(ChapterActivity.this, "Truyện đã tải về", Toast.LENGTH_SHORT).show();*/
             }
         });
 
@@ -164,6 +178,51 @@ public class ChapterActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+    //API tải các chapter
+    private void downloadChapter(int mangaid){
+        iComicAPI.getLinkDownload(mangaid).enqueue(new Callback<List<ChapContent>>() {
+            @Override
+            public void onResponse(Call<List<ChapContent>> call, Response<List<ChapContent>> response) {
+                if (response.isSuccessful()) {
+                    List<ChapContent> chapters = response.body();
+                    if (chapters != null && !chapters.isEmpty()) {
+                        // Lấy cơ sở dữ liệu từ DatabaseHelper
+                        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+                        // Duyệt qua tất cả các chương và lưu vào SQLite
+                        for (ChapContent chapter : chapters) {
+                            int chapterid = chapter.getChapterid();  // Giả sử ChapContent có phương thức getChapterId()
+                            String chapterTitle = chapter.getChapter_title();  // Giả sử ChapContent có phương thức getChapterTitle()
+                            String content = chapter.getContent();  // Giả sử ChapContent có phương thức getContent()
+
+                            // Chèn thông tin chương vào cơ sở dữ liệu SQLite
+                            ContentValues values = new ContentValues();
+                            values.put(DatabaseHelper.COLUMN_MANGAID, mangaid);
+                            values.put(DatabaseHelper.COLUMN_CHAPTERID, chapterid);
+                            values.put(DatabaseHelper.COLUMN_CHAPTER_TITLE, chapterTitle);
+                            values.put(DatabaseHelper.COLUMN_CONTENT, content);
+
+                            // Chèn vào bảng download
+                            db.insert(DatabaseHelper.TABLE_DOWNLOADS, null, values);
+                        }
+
+                        // Hiển thị thông báo cho người dùng
+                        runOnUiThread(() -> Toast.makeText(ChapterActivity.this, "Các chương đã tải về", Toast.LENGTH_SHORT).show());
+                    }
+                } else {
+                    // Xử lý khi response không thành công
+                    runOnUiThread(() -> Toast.makeText(ChapterActivity.this, "Tải chương không thành công", Toast.LENGTH_SHORT).show());
+                }
+
+                }
+
+
+            @Override
+            public void onFailure(Call<List<ChapContent>> call, Throwable t) {
+                runOnUiThread(() -> Toast.makeText(ChapterActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show());
+            }
+        });
+    }
 
     //Gọi API đếm số chương
     private void getChapsize(int mangaid) {
@@ -186,34 +245,9 @@ public class ChapterActivity extends AppCompatActivity {
         });
     }
 
-    //Lấy linkdownload
-    private void getLinkDownload(int mangaid){
-        iComicAPI.getLinkDownload(mangaid).enqueue(new Callback<List<LinkResponse>>() {
-            @Override
-            public void onResponse(Call<List<LinkResponse>> call, Response<List<LinkResponse>> response) {
-                if (response.isSuccessful() && response != null){
-                    List<LinkResponse> linkResponses = response.body();
-                    for (LinkResponse linkResponse : linkResponses ){
-                        linkDownload.add(linkResponse.getLink());
-                    }
-                    Log.d("LinkDownload", "Received links: " + linkResponses);
-                    PdfCreator pdfCreator = new PdfCreator();
-                    pdfCreator.createPdf(ChapterActivity.this, name, linkDownload);
-                    insertDownload(username,name,mangaid,historyimage);
-                } else {
-                    Log.e("API_ERROR", "Không tìm thấy link");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<LinkResponse>> call, Throwable t) {
-                Log.e("API_ERROR", t.getMessage());
-            }
-        });
-    }
     //Thêm vào bảng history
-    private void insertDownload(String username,String manganame, int mangaid,String url){
-        Download download = new Download(username,manganame,mangaid,url);
+    private void insertDownload(String username,String manganame, int mangaid,String url,int views, String tacgia){
+        Download download = new Download(username,manganame,mangaid,url,views,tacgia);
         iComicAPI.insertDownload(download).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {

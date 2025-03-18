@@ -5,15 +5,33 @@ public class Download {
     private String manganame;
     private int mangaid;
     private String url;
+    private int views;
+    private String tacgia;
 
-    public Download() {
-    }
 
-    public Download(String username, String manganame, int mangaid,String url) {
+    public Download(String username, String manganame, int mangaid,String url,int views,String tacgia) {
         this.username = username;
         this.manganame = manganame;
         this.mangaid = mangaid;
         this.url = url;
+        this.views = views;
+        this.tacgia = tacgia;
+    }
+
+    public int getViews() {
+        return views;
+    }
+
+    public void setViews(int views) {
+        this.views = views;
+    }
+
+    public String getTacgia() {
+        return tacgia;
+    }
+
+    public void setTacgia(String tacgia) {
+        this.tacgia = tacgia;
     }
 
     public String getUsername() {
