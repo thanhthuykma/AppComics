@@ -1,6 +1,7 @@
 package com.example.appcomics.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,10 +11,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.appcomics.Controller.ReadStoryDownActivity;
 import com.example.appcomics.Model.ChapContent;
 import com.example.appcomics.R;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DownChapAdapter extends RecyclerView.Adapter<DownChapAdapter.DownChapViewHolder> {
@@ -41,6 +44,19 @@ public class DownChapAdapter extends RecyclerView.Adapter<DownChapAdapter.DownCh
         // Cập nhật vòng tròn tiến trình
         holder.progressCircle.setProgress(percentRead);
         holder.progressper.setText(String.valueOf(percentRead)+"%");
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, ReadStoryDownActivity.class);
+                intent.putExtra("chapterid",chapContent.getChapterid());
+                intent.putExtra("content",chapContent.getContent());
+                intent.putExtra("title",chapContent.getChapter_title());
+                intent.putParcelableArrayListExtra("chapterList", new ArrayList<>(chapContentList)); // Gửi danh sách chương
+                intent.putExtra("position", holder.getAdapterPosition()); // Gửi vị trí hiện tại
+                context.startActivity(intent);
+            }
+        });
     }
 
     @Override
