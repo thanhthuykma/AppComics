@@ -5,13 +5,16 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.MediaController;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.Switch;
@@ -20,23 +23,30 @@ import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
 
+import com.example.appcomics.Model.AudioResponse;
 import com.example.appcomics.Model.Chapter;
 import com.example.appcomics.Model.ChapterContent;
+import com.example.appcomics.Model.ContentRequest;
 import com.example.appcomics.R;
 import com.example.appcomics.retrofit.IComicAPI;
 import com.example.appcomics.retrofit.RetrofitClient;
 import android.widget.Spinner;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ReadStoryActivity extends AppCompatActivity {
     private IComicAPI iComicAPI;
-    private ImageButton btnback, btnnext;
+    private ImageButton btnback, btnnext, btntts;
     private Toolbar toolbar;
     private int mangaid;
     private TextView story_content,tvchaptername;
@@ -44,6 +54,7 @@ public class ReadStoryActivity extends AppCompatActivity {
     private List<Chapter> chapterList;
     private int chapterid;
     private Switch themeSwitch;
+    private String content;
     private boolean isDarkMode = false;
     private SeekBar fontSizeSeekBar;
     private float textSize;
@@ -61,12 +72,15 @@ public class ReadStoryActivity extends AppCompatActivity {
 
         btnback = findViewById(R.id.btn_previous);
         btnnext = findViewById(R.id.btn_next);
+        btntts = findViewById(R.id.btn_tts);
         toolbar = findViewById(R.id.toolbar_read);
         story_content = findViewById(R.id.story_content);
         scrollView = findViewById(R.id.scrollView);
         themeSwitch = findViewById(R.id.theme_switch);
         tvchaptername = findViewById(R.id.chapter_number);
         tvchaptername.setText(tenchap);
+        //Text to speech
+        // Trong Activity hoặc Fragment của bạn
 
         btnback.setOnClickListener(v -> navigateToChapter(-1));
         btnnext.setOnClickListener(v -> navigateToChapter(1));
@@ -109,6 +123,15 @@ public class ReadStoryActivity extends AppCompatActivity {
         iComicAPI = RetrofitClient.getClient().create(IComicAPI.class);
         fetchcontent(chapterid);
         fetchChaptersByMangaId(mangaid);
+        btntts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ContentRequest contentRequest = new ContentRequest(content);
+                            // Gọi tiếp API phát âm thanh từ ID
+                            playAudioFromId(chapterid);
+            }
+        });
+
     }
     //chỉnh sáng tối
     private void applyTheme() {
@@ -120,6 +143,74 @@ public class ReadStoryActivity extends AppCompatActivity {
             story_content.setTextColor(Color.BLACK);
         }
     }
+    // Hàm để phát âm thanh từ URL
+    private void playAudioFromId(int id) {
+        IComicAPI iComicAPI = RetrofitClient.getClient().create(IComicAPI.class);
+
+        iComicAPI.getAudio(id).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        byte[] audioData = response.body().bytes();
+
+                        // Tạo file tạm để lưu âm thanh
+                        File tempFile = File.createTempFile("audio", ".mp3", getCacheDir());
+                        FileOutputStream fos = new FileOutputStream(tempFile);
+                        fos.write(audioData);
+                        fos.close();
+
+                        // Tạo MediaPlayer
+                        MediaPlayer mediaPlayer = new MediaPlayer();
+                        mediaPlayer.setDataSource(tempFile.getAbsolutePath());
+                        mediaPlayer.prepare();
+                        mediaPlayer.start();
+
+                        // Hiển thị MediaController
+                        runOnUiThread(() -> {
+                            FrameLayout anchor = findViewById(R.id.audioLayout); // layout chứa MediaController
+                            MediaController mediaController = new MediaController(ReadStoryActivity.this);
+
+                            mediaController.setMediaPlayer(new MediaController.MediaPlayerControl() {
+                                @Override public void start() { mediaPlayer.start(); }
+                                @Override public void pause() { mediaPlayer.pause(); }
+                                @Override public int getDuration() { return mediaPlayer.getDuration(); }
+                                @Override public int getCurrentPosition() { return mediaPlayer.getCurrentPosition(); }
+                                @Override public void seekTo(int pos) { mediaPlayer.seekTo(pos); }
+                                @Override public boolean isPlaying() { return mediaPlayer.isPlaying(); }
+                                @Override public int getBufferPercentage() { return 100; }
+                                @Override public boolean canPause() { return true; }
+                                @Override public boolean canSeekBackward() { return true; }
+                                @Override public boolean canSeekForward() { return true; }
+                                @Override public int getAudioSessionId() { return mediaPlayer.getAudioSessionId(); }
+                            });
+
+                            mediaController.setAnchorView(anchor);
+                            mediaController.setEnabled(true);
+                            mediaController.show(0);
+                        });
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        runOnUiThread(() ->
+                                Toast.makeText(getApplicationContext(), "Lỗi khi đọc dữ liệu âm thanh", Toast.LENGTH_SHORT).show());
+                    }
+                } else {
+                    runOnUiThread(() ->
+                            Toast.makeText(getApplicationContext(), "Không thể tải âm thanh", Toast.LENGTH_SHORT).show());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                t.printStackTrace();
+                runOnUiThread(() ->
+                        Toast.makeText(getApplicationContext(), "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show());
+            }
+        });
+    }
+
+
 
     //thêm chapter vào spinner
     private void fetchChaptersByMangaId(int mangaid) {
@@ -221,7 +312,7 @@ public class ReadStoryActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<ChapterContent> call, Response<ChapterContent> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    String content = response.body().getNoidung();
+                    content = response.body().getNoidung();
                     story_content.setText(content);
                     int savedPosition = getSharedPreferences("ReadingPrefs", MODE_PRIVATE)
                             .getInt("scroll_position_" + chapterid, 0);

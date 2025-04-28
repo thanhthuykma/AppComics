@@ -21,6 +21,8 @@ import androidx.annotation.Nullable;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
+import androidx.security.crypto.EncryptedSharedPreferences;
+import androidx.security.crypto.MasterKeys;
 
 import com.example.appcomics.Model.ForgotPasswordRequest;
 import com.example.appcomics.Model.LoginResponse;
@@ -70,6 +72,12 @@ public class LoginActivity extends AppCompatActivity {
 
         loginbutton = findViewById(R.id.btnDangNhap);
         username = findViewById(R.id.txtTaikhoan);
+        String usernameen = getUsernameFromEncryptedPreferences();
+        if (usernameen != null){
+            username.setText(usernameen);
+        }else {
+            username.setText("");
+        }
         password = findViewById(R.id.txtMatKhau);
         forgetpass = findViewById(R.id.tvForgotPassword);
         btnvantay = findViewById(R.id.btnFingerprint);
@@ -332,6 +340,8 @@ public class LoginActivity extends AppCompatActivity {
                             editor.putString("RefreshToken", refreshToken);
                             editor.apply();
 
+                            saveUsernameEncrypted(user);
+
                             Toast.makeText(LoginActivity.this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             intent.putExtra("username", user);
@@ -360,6 +370,43 @@ public class LoginActivity extends AppCompatActivity {
             showLockoutDialog();
         }
     }
+    private String getUsernameFromEncryptedPreferences() {
+        String username = null;
+        try {
+            SharedPreferences sharedPreferences = EncryptedSharedPreferences.create(
+                    "EncryptedSession",
+                    MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC),
+                    this,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            );
+
+            username = sharedPreferences.getString("username", null); // null nếu không có giá trị
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return username;
+    }
+
+    private void saveUsernameEncrypted(String username) {
+        try {
+            SharedPreferences sharedPreferences = EncryptedSharedPreferences.create(
+                    "EncryptedSession",
+                    MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC),
+                    this,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            );
+
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("username", username);
+            editor.apply();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
     private void showLockoutDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);

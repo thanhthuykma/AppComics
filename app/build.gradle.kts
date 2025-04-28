@@ -82,6 +82,8 @@ dependencies {
     implementation ("com.google.android.gms:play-services-safetynet:17.0.0")
     //jwt
     implementation ("com.auth0:java-jwt:3.19.2")
+    implementation ("androidx.security:security-crypto:1.1.0-alpha06")
+
 
 
     testImplementation("junit:junit:4.13.2")

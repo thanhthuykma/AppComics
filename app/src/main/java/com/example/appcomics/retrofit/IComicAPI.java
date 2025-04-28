@@ -1,5 +1,6 @@
 package com.example.appcomics.retrofit;
 
+import com.example.appcomics.Model.AudioResponse;
 import com.example.appcomics.Model.Author;
 import com.example.appcomics.Model.Banner;
 import com.example.appcomics.Model.Catergory;
@@ -12,6 +13,7 @@ import com.example.appcomics.Model.Comic;
 import com.example.appcomics.Model.Comic1;
 import com.example.appcomics.Model.ComicCountResponse;
 import com.example.appcomics.Model.Comment;
+import com.example.appcomics.Model.ContentRequest;
 import com.example.appcomics.Model.DownLoadHIis;
 import com.example.appcomics.Model.Download;
 import com.example.appcomics.Model.Favourite;
@@ -149,6 +151,12 @@ public interface IComicAPI {
     //API lấy nội dung chương
     @GET("/chaptercontent/{chapterid}")
     Call<ChapterContent> getChapcontent(@Path("chapterid") int chapterid);
+    //tts
+    @POST("tts/{chapterid}")
+    Call<AudioResponse> generateAudio(@Path("chapterid") int chapterid, @Body ContentRequest contentRequest);
+    @GET("/audio/{id}")
+    Call<ResponseBody> getAudio(@Path("id") int id);
+
 
     //Kiểm tra username
     @POST("/user")
