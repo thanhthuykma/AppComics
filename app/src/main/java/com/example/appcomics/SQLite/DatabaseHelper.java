@@ -26,6 +26,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_CHAPTERID = "chapterid";
     public static final String COLUMN_CHAPTER_TITLE = "chapter_title";
     public static final String COLUMN_CONTENT = "content";
+    public static final String COLUMN_TAC_GIA = "tacgia";
+    public static final String COLUMN_VIEWS = "views";
+    public static final String COLUMN_IMAGES = "image";
+    public static final String COLUMN_AUDIO_FILE = "audiofile";
 
     // SQL query để tạo bảng
     private static final String CREATE_DOWNLOADS_TABLE = "CREATE TABLE " + TABLE_DOWNLOADS + "("
@@ -33,6 +37,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + COLUMN_MANGAID + " INTEGER,"
             + COLUMN_CHAPTERID + " INTEGER,"
             + COLUMN_CHAPTER_TITLE + " TEXT,"
+            + COLUMN_TAC_GIA + " TEXT,"
+            + COLUMN_VIEWS + " INTEGER,"
+            + COLUMN_IMAGES + " TEXT,"
+            + COLUMN_AUDIO_FILE + " BLOB,"
             + COLUMN_CONTENT + " TEXT)";
 
     // Constructor

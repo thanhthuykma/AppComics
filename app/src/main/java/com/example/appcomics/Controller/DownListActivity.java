@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.appcomics.Adapter.ChapterAdapter;
@@ -31,6 +32,7 @@ public class DownListActivity extends AppCompatActivity {
     private List<ChapContent> chapters;
     private ImageButton btn_delete;
     private IComicAPI iComicAPI;
+    private TextView textchapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +45,10 @@ public class DownListActivity extends AppCompatActivity {
 
         // Lấy danh sách các chương từ SQLite
         DatabaseHelper dbHelper = new DatabaseHelper(this);
-        int mangaId = getIntent().getIntExtra("MANGA_ID", -1); // Giả sử mangaId được truyền qua Intent
+        int mangaId = getIntent().getIntExtra("MANGA_ID", -1);
+        int chapcount = getIntent().getIntExtra("CHAPTER_COUNT", 0);
+        textchapter = findViewById(R.id.text_chapter);
+        textchapter.setText("   Số chương("+ chapcount+ ")");
         chapters = dbHelper.getDownloadedChapters(mangaId); // Lấy danh sách chương đã tải về
 
         // Thiết lập Adapter cho RecyclerView
@@ -97,4 +102,5 @@ public class DownListActivity extends AppCompatActivity {
             }
         });
     }
+
 }

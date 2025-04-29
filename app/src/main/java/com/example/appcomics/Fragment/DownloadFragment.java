@@ -1,5 +1,7 @@
 package com.example.appcomics.Fragment;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -17,12 +19,15 @@ import com.example.appcomics.Adapter.HistoryAdapter;
 import com.example.appcomics.Model.ChapterCountResponse;
 import com.example.appcomics.Model.Comic1;
 import com.example.appcomics.Model.DownLoadHIis;
+import com.example.appcomics.Model.DownLoadHIsSQL;
 import com.example.appcomics.Model.History;
 import com.example.appcomics.Model.ViewsResponse;
 import com.example.appcomics.R;
+import com.example.appcomics.SQLite.DatabaseHelper;
 import com.example.appcomics.retrofit.IComicAPI;
 import com.example.appcomics.retrofit.RetrofitClient;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +46,7 @@ public class DownloadFragment extends Fragment {
     private Map<Integer, Integer> viewsMap = new HashMap<>();
     private List<Comic1> download;
     private int pendingRequests;
+    private DatabaseHelper dbHelper;
 
     public DownloadFragment() {
         // Required empty public constructor
@@ -53,6 +59,7 @@ public class DownloadFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_download, container, false);
         recyclerView = view.findViewById(R.id.recycler_download);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        dbHelper = new DatabaseHelper(getContext());
 
         //Tạo api
         iComicAPI = RetrofitClient.getClient().create(IComicAPI.class);
@@ -62,30 +69,47 @@ public class DownloadFragment extends Fragment {
         }
 
         //Lấy dữ liệu từ bảng history
-        getDownload(username);
+        getDownload();
 
         return view;
     }
 
-    public void getDownload(String username) {
-        iComicAPI.getDownload(username).enqueue(new Callback<List<DownLoadHIis>>() {
-            @Override
-            public void onResponse(Call<List<DownLoadHIis>> call, Response<List<DownLoadHIis>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                   List<DownLoadHIis> downloads = response.body();
-                    // In ra dữ liệu trả về để kiểm tra
-                    for (DownLoadHIis comic : downloads) {
-                        Log.d("Download", "Title: " + comic.getManganame() + ", Views: " + comic.getViews());
-                    }
-                    DownLoadAdapter downLoadAdapter = new DownLoadAdapter(getContext(),downloads);
-                    recyclerView.setAdapter(downLoadAdapter);
-                }
-            }
+    public void getDownload() {
+        List<DownLoadHIsSQL> downloads = new ArrayList<>();
 
-            @Override
-            public void onFailure(Call<List<DownLoadHIis>> call, Throwable t) {
-                Toast.makeText(getContext(), "Lỗi: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+        // Mở kết nối tới database
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        // Truy vấn dữ liệu từ bảng downloads với điều kiện username nếu cần (hoặc bỏ điều kiện nếu không lưu username trong bảng)
+        String query = "SELECT * FROM " + DatabaseHelper.TABLE_DOWNLOADS;
+        Cursor cursor = db.rawQuery(query, null);
+
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                int mangaid = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_MANGAID));
+                String manganame = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_CHAPTER_TITLE));
+                int views = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_VIEWS));
+                String image = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_IMAGES));
+                String tacgia = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_TAC_GIA));
+
+                DownLoadHIsSQL comic = new DownLoadHIsSQL(mangaid, manganame, views, image,tacgia);
+                downloads.add(comic);
+            } while (cursor.moveToNext());
+
+            cursor.close();
+        }
+
+        db.close();
+
+        // In ra dữ liệu kiểm tra
+        for (DownLoadHIsSQL comic : downloads) {
+            Log.d("Download-SQLite", "Title: " + comic.getManganame() + ", Views: " + comic.getViews());
+        }
+
+        // Cập nhật RecyclerView
+        DownLoadAdapter downLoadAdapter = new DownLoadAdapter(getContext(), downloads);
+        recyclerView.setAdapter(downLoadAdapter);
+
+
     }
 }

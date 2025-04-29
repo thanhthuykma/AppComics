@@ -8,6 +8,7 @@ public class DownLoadHIis {
     private int views;
     private String tacgia;
 
+
     public DownLoadHIis(String username, String manganame, int mangaid, String url, int views, String tacgia) {
         this.username = username;
         this.manganame = manganame;
@@ -15,6 +16,7 @@ public class DownLoadHIis {
         this.url = url;
         this.views = views;
         this.tacgia = tacgia;
+
     }
 
     public String getUsername() {
@@ -64,4 +66,5 @@ public class DownLoadHIis {
     public void setTacgia(String tacgia) {
         this.tacgia = tacgia;
     }
+
 }

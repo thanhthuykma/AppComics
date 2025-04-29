@@ -183,9 +183,9 @@ public class ChapterActivity extends AppCompatActivity {
 
                         // Duyệt qua tất cả các chương và lưu vào SQLite
                         for (ChapContent chapter : chapters) {
-                            int chapterid = chapter.getChapterid();  // Giả sử ChapContent có phương thức getChapterId()
-                            String chapterTitle = chapter.getChapter_title();  // Giả sử ChapContent có phương thức getChapterTitle()
-                            String content = chapter.getContent();  // Giả sử ChapContent có phương thức getContent()
+                            int chapterid = chapter.getChapterid();
+                            String chapterTitle = chapter.getChapter_title();
+                            String content = chapter.getContent();
 
                             // Kiểm tra xem chương đã tồn tại chưa
                             String checkQuery = "SELECT * FROM " + DatabaseHelper.TABLE_DOWNLOADS +
@@ -200,10 +200,24 @@ public class ChapterActivity extends AppCompatActivity {
                                 values.put(DatabaseHelper.COLUMN_CHAPTERID, chapterid);
                                 values.put(DatabaseHelper.COLUMN_CHAPTER_TITLE, chapterTitle);
                                 values.put(DatabaseHelper.COLUMN_CONTENT, content);
+                                values.put(DatabaseHelper.COLUMN_TAC_GIA,tacgia);
+                                values.put(DatabaseHelper.COLUMN_VIEWS,views);
+                                values.put(DatabaseHelper.COLUMN_IMAGES,historyimage);
 
-                                // Chèn vào bảng download
-                                db.insert(DatabaseHelper.TABLE_DOWNLOADS, null, values);
+                                // Chèn vào bảng download và kiểm tra kết quả
+                                long result = db.insert(DatabaseHelper.TABLE_DOWNLOADS, null, values);
+
+                                if (result != -1) {
+                                    // Chèn thành công
+                                    Log.d("SQLite", "Chương " + chapterTitle + " đã được lưu vào SQLite.");
+                                } else {
+                                    // Chèn thất bại
+                                    Log.d("SQLite", "Lỗi khi lưu chương " + chapterTitle + " vào SQLite.");
+                                }
+                            } else {
+                                Log.d("SQLite", "Chương " + chapterTitle + " đã tồn tại trong SQLite.");
                             }
+
 
                             cursor.close();
                         }
