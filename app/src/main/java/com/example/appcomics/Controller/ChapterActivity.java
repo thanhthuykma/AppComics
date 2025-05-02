@@ -15,11 +15,14 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,9 +39,13 @@ import com.example.appcomics.SQLite.DatabaseHelper;
 import com.example.appcomics.retrofit.IComicAPI;
 import com.example.appcomics.retrofit.RetrofitClient;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -178,66 +185,108 @@ public class ChapterActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     List<ChapContent> chapters = response.body();
                     if (chapters != null && !chapters.isEmpty()) {
-                        // Lấy cơ sở dữ liệu từ DatabaseHelper
                         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-                        // Duyệt qua tất cả các chương và lưu vào SQLite
                         for (ChapContent chapter : chapters) {
-                            int chapterid = chapter.getChapterid();
-                            String chapterTitle = chapter.getChapter_title();
-                            String content = chapter.getContent();
+                            final int chapterid = chapter.getChapterid();
+                            final String chapterTitle = chapter.getChapter_title();
+                            final String content = chapter.getContent();
 
-                            // Kiểm tra xem chương đã tồn tại chưa
+                            // Khai báo các biến cần thiết final để dùng trong async
+                            final String finalTacgia = tacgia;
+                            final int finalViews = views;
+                            final String finalHistoryImage = historyimage;
+
                             String checkQuery = "SELECT * FROM " + DatabaseHelper.TABLE_DOWNLOADS +
                                     " WHERE " + DatabaseHelper.COLUMN_MANGAID + " = ? AND " +
                                     DatabaseHelper.COLUMN_CHAPTERID + " = ?";
                             Cursor cursor = db.rawQuery(checkQuery, new String[]{String.valueOf(mangaid), String.valueOf(chapterid)});
 
-                            if (cursor.getCount() == 0) {  // Nếu không có chương này trong cơ sở dữ liệu
-                                // Chèn thông tin chương vào cơ sở dữ liệu SQLite
-                                ContentValues values = new ContentValues();
-                                values.put(DatabaseHelper.COLUMN_MANGAID, mangaid);
-                                values.put(DatabaseHelper.COLUMN_CHAPTERID, chapterid);
-                                values.put(DatabaseHelper.COLUMN_CHAPTER_TITLE, chapterTitle);
-                                values.put(DatabaseHelper.COLUMN_CONTENT, content);
-                                values.put(DatabaseHelper.COLUMN_TAC_GIA,tacgia);
-                                values.put(DatabaseHelper.COLUMN_VIEWS,views);
-                                values.put(DatabaseHelper.COLUMN_IMAGES,historyimage);
+                            if (cursor.getCount() == 0) {
+                                cursor.close();
 
-                                // Chèn vào bảng download và kiểm tra kết quả
-                                long result = db.insert(DatabaseHelper.TABLE_DOWNLOADS, null, values);
+                                iComicAPI.getAudio(chapterid).enqueue(new Callback<ResponseBody>() {
+                                    @Override
+                                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                        if (response.isSuccessful() && response.body() != null) {
+                                            try {
+                                                byte[] audioData = response.body().bytes();
 
-                                if (result != -1) {
-                                    // Chèn thành công
-                                    Log.d("SQLite", "Chương " + chapterTitle + " đã được lưu vào SQLite.");
-                                } else {
-                                    // Chèn thất bại
-                                    Log.d("SQLite", "Lỗi khi lưu chương " + chapterTitle + " vào SQLite.");
-                                }
+                                                // Tạo đường dẫn file để lưu âm thanh
+                                                File audioFile = new File(getFilesDir(), "audio_" + chapterid + ".mp3");
+                                                FileOutputStream fos = new FileOutputStream(audioFile);
+                                                fos.write(audioData);
+                                                fos.close();
+
+                                                Log.d("AUDIO", "File âm thanh đã lưu tại: " + audioFile.getAbsolutePath());
+
+                                                // Lưu đường dẫn file vào SharedPreferences
+                                                SharedPreferences prefs = getSharedPreferences("AudioPrefs", MODE_PRIVATE);
+                                                prefs.edit().putString("audio_path_chap_" + chapterid, audioFile.getAbsolutePath()).apply();
+
+                                                // Lưu các thông tin chương vào SQLite như cũ (ngoại trừ audioData)
+                                                ContentValues values = new ContentValues();
+                                                values.put(DatabaseHelper.COLUMN_MANGAID, mangaid);
+                                                values.put(DatabaseHelper.COLUMN_CHAPTERID, chapterid);
+                                                values.put(DatabaseHelper.COLUMN_CHAPTER_TITLE, chapterTitle);
+                                                values.put(DatabaseHelper.COLUMN_CONTENT, content);
+                                                values.put(DatabaseHelper.COLUMN_TAC_GIA, finalTacgia);
+                                                values.put(DatabaseHelper.COLUMN_VIEWS, finalViews);
+                                                values.put(DatabaseHelper.COLUMN_IMAGES, finalHistoryImage);
+
+                                                long result = db.insert(DatabaseHelper.TABLE_DOWNLOADS, null, values);
+                                                if (result != -1) {
+                                                    Log.d("SQLite", "Đã lưu chương: " + chapterTitle);
+                                                } else {
+                                                    Log.e("SQLite", "Lỗi khi lưu chương: " + chapterTitle);
+                                                }
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                                Log.e("AUDIO", "Lỗi khi đọc dữ liệu âm thanh.");
+                                                runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Lỗi khi đọc dữ liệu âm thanh", Toast.LENGTH_SHORT).show());
+                                            }
+                                        } else {
+                                            Log.e("AUDIO", "Không nhận được dữ liệu âm thanh từ API.");
+                                            runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Không thể tải âm thanh cho chương: " + chapterTitle, Toast.LENGTH_SHORT).show());
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                        t.printStackTrace();
+                                        Log.e("AUDIO", "Lỗi khi gọi API audio: " + t.getMessage());
+                                        runOnUiThread(() -> Toast.makeText(getApplicationContext(), "Lỗi mạng khi tải âm thanh", Toast.LENGTH_SHORT).show());
+                                    }
+                                });
+
+
                             } else {
-                                Log.d("SQLite", "Chương " + chapterTitle + " đã tồn tại trong SQLite.");
+                                cursor.close();
+                                Log.d("SQLite", "Chương " + chapterTitle + " đã tồn tại, không lưu lại.");
                             }
-
-
-                            cursor.close();
                         }
 
-                        // Hiển thị thông báo cho người dùng
-                        runOnUiThread(() -> Toast.makeText(ChapterActivity.this, "Các chương đã tải về", Toast.LENGTH_SHORT).show());
+                        runOnUiThread(() -> Toast.makeText(ChapterActivity.this, "Đang tải các chương...", Toast.LENGTH_SHORT).show());
+                        runOnUiThread(() -> Toast.makeText(ChapterActivity.this, "Tải về thành công", Toast.LENGTH_SHORT).show());
+
+
+                    } else {
+                        Toast.makeText(ChapterActivity.this, "Không có chương nào để tải", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    // Xử lý khi response không thành công
-                    runOnUiThread(() -> Toast.makeText(ChapterActivity.this, "Tải chương không thành công", Toast.LENGTH_SHORT).show());
+                    Toast.makeText(ChapterActivity.this, "Không thể lấy danh sách chương", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<ChapContent>> call, Throwable t) {
-                // Xử lý khi có lỗi trong quá trình gọi API
-                runOnUiThread(() -> Toast.makeText(ChapterActivity.this, "Lỗi tải dữ liệu", Toast.LENGTH_SHORT).show());
+                Toast.makeText(ChapterActivity.this, "Lỗi tải danh sách chương: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
+
+
+
 
 
     //Gọi API đếm số chương

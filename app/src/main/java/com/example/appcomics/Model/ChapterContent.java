@@ -3,7 +3,6 @@ package com.example.appcomics.Model;
 public class ChapterContent {
     private String Name;
     private String noidung;
-
     public ChapterContent(String name, String noidung) {
         Name = name;
         this.noidung = noidung;

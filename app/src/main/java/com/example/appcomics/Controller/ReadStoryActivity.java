@@ -58,6 +58,8 @@ public class ReadStoryActivity extends AppCompatActivity {
     private boolean isDarkMode = false;
     private SeekBar fontSizeSeekBar;
     private float textSize;
+    private MediaPlayer mediaPlayer;
+    private MediaController mediaController;
 
 
     @Override
@@ -153,6 +155,19 @@ public class ReadStoryActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         byte[] audioData = response.body().bytes();
+                        // Kiểm tra nếu có MediaPlayer đang phát, dừng nó và giải phóng tài nguyên
+                        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                            mediaPlayer.stop();
+                            mediaPlayer.release();
+                            mediaPlayer = null;
+
+                            // Nếu có MediaController, ẩn nó
+                            if (mediaController != null) {
+                                mediaController.hide();
+                                mediaController = null;
+                            }
+                        }
+
 
                         // Tạo file tạm để lưu âm thanh
                         File tempFile = File.createTempFile("audio", ".mp3", getCacheDir());
@@ -161,7 +176,7 @@ public class ReadStoryActivity extends AppCompatActivity {
                         fos.close();
 
                         // Tạo MediaPlayer
-                        MediaPlayer mediaPlayer = new MediaPlayer();
+                        mediaPlayer = new MediaPlayer();
                         mediaPlayer.setDataSource(tempFile.getAbsolutePath());
                         mediaPlayer.prepare();
                         mediaPlayer.start();
@@ -169,7 +184,7 @@ public class ReadStoryActivity extends AppCompatActivity {
                         // Hiển thị MediaController
                         runOnUiThread(() -> {
                             FrameLayout anchor = findViewById(R.id.audioLayout); // layout chứa MediaController
-                            MediaController mediaController = new MediaController(ReadStoryActivity.this);
+                            mediaController = new MediaController(ReadStoryActivity.this);
 
                             mediaController.setMediaPlayer(new MediaController.MediaPlayerControl() {
                                 @Override public void start() { mediaPlayer.start(); }

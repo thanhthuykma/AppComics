@@ -4,13 +4,20 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
+
 import android.content.Intent;
 import android.graphics.Color;
+import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.MediaController;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
@@ -21,9 +28,14 @@ import android.widget.Toast;
 import com.example.appcomics.Model.ChapContent;
 import com.example.appcomics.Model.Chapter;
 import com.example.appcomics.R;
+import com.example.appcomics.SQLite.DatabaseHelper;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import android.database.Cursor;
 
 public class ReadStoryDownActivity extends AppCompatActivity {
     private int chapterid;
@@ -38,6 +50,9 @@ public class ReadStoryDownActivity extends AppCompatActivity {
     private SeekBar fontSizeSeekBar;
     private float textSize;
     private ScrollView scrollView;
+    private ImageButton btn_tts;
+    private MediaPlayer mediaPlayer;
+    private MediaController mediaController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -142,6 +157,13 @@ public class ReadStoryDownActivity extends AppCompatActivity {
                 displayChapter();
             }
         });
+        btn_tts = findViewById(R.id.btn_tts);
+        btn_tts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+playAudioFromId(chapterid);
+            }
+        });
     }
     private void displayChapter() {
         if (chapContentList != null && !chapContentList.isEmpty()) {
@@ -196,6 +218,81 @@ public class ReadStoryDownActivity extends AppCompatActivity {
             }
         });
     }
+    private void playAudioFromId(int chapterid) {
+        // Kiểm tra nếu có MediaPlayer đang phát, dừng nó và giải phóng tài nguyên
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
+
+            // Nếu có MediaController, ẩn nó
+            if (mediaController != null) {
+                mediaController.hide();
+                mediaController = null;
+            }
+        }
+        // Lấy đường dẫn của file âm thanh từ SharedPreferences
+        SharedPreferences prefs = getSharedPreferences("AudioPrefs", MODE_PRIVATE);
+        String audioPath = prefs.getString("audio_path_chap_" + chapterid, null);
+
+        if (audioPath != null) {
+            File audioFile = new File(audioPath);
+            if (audioFile.exists()) {
+                try {
+                    // Sử dụng MediaPlayer để phát âm thanh từ file
+                    mediaPlayer = new MediaPlayer();
+                    mediaPlayer.setDataSource(audioFile.getAbsolutePath());
+                    mediaPlayer.prepare();
+                    mediaPlayer.start();
+
+                    Log.d("AUDIO", "Đang phát âm thanh từ: " + audioFile.getAbsolutePath());
+
+                    // Hiển thị MediaController
+                    runOnUiThread(() -> {
+                        FrameLayout anchor = findViewById(R.id.audioLayout); // layout chứa MediaController
+                        mediaController = new MediaController(ReadStoryDownActivity.this);
+
+                        mediaController.setMediaPlayer(new MediaController.MediaPlayerControl() {
+                            @Override public void start() { mediaPlayer.start(); }
+                            @Override public void pause() { mediaPlayer.pause(); }
+                            @Override public int getDuration() { return mediaPlayer.getDuration(); }
+                            @Override public int getCurrentPosition() { return mediaPlayer.getCurrentPosition(); }
+                            @Override public void seekTo(int pos) { mediaPlayer.seekTo(pos); }
+                            @Override public boolean isPlaying() { return mediaPlayer.isPlaying(); }
+                            @Override public int getBufferPercentage() { return 100; }
+                            @Override public boolean canPause() { return true; }
+                            @Override public boolean canSeekBackward() { return true; }
+                            @Override public boolean canSeekForward() { return true; }
+                            @Override public int getAudioSessionId() { return mediaPlayer.getAudioSessionId(); }
+                        });
+
+                        mediaController.setAnchorView(anchor);
+                        mediaController.setEnabled(true);
+                        mediaController.show(0);
+                    });
+
+                    // Giải phóng MediaPlayer khi hoàn thành
+                    mediaPlayer.setOnCompletionListener(mp -> mp.release());
+
+                } catch (IOException e) {
+                    Log.e("AUDIO", "Lỗi khi phát âm thanh: " + e.getMessage());
+                    runOnUiThread(() ->
+                            Toast.makeText(getApplicationContext(), "Lỗi khi phát âm thanh", Toast.LENGTH_SHORT).show());
+                }
+            } else {
+                Log.e("AUDIO", "File âm thanh không tồn tại: " + audioFile.getAbsolutePath());
+                runOnUiThread(() ->
+                        Toast.makeText(getApplicationContext(), "File âm thanh không tồn tại", Toast.LENGTH_SHORT).show());
+            }
+        } else {
+            Log.e("AUDIO", "Không tìm thấy đường dẫn âm thanh cho chương: " + chapterid);
+            runOnUiThread(() ->
+                    Toast.makeText(getApplicationContext(), "Không tìm thấy âm thanh cho chương", Toast.LENGTH_SHORT).show());
+        }
+    }
+
+
+
 
 }
 

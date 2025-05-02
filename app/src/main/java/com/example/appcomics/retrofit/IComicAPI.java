@@ -19,7 +19,6 @@ import com.example.appcomics.Model.Download;
 import com.example.appcomics.Model.Favourite;
 import com.example.appcomics.Model.ForgotPasswordRequest;
 import com.example.appcomics.Model.History;
-import com.example.appcomics.Model.LinkResponse;
 import com.example.appcomics.Model.Links;
 import com.example.appcomics.Model.LoginResponse;
 import com.example.appcomics.Model.RefreshTokenResponse;
@@ -156,6 +155,8 @@ public interface IComicAPI {
     Call<AudioResponse> generateAudio(@Path("chapterid") int chapterid, @Body ContentRequest contentRequest);
     @GET("/audio/{id}")
     Call<ResponseBody> getAudio(@Path("id") int id);
+    @GET("/recommendations/{username}")
+    Call<List<Comic>> getRecommendations(@Path("username") String username);
 
 
     //Kiểm tra username

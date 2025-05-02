@@ -62,6 +62,15 @@
             android:layout_gravity="bottom|center_horizontal"
             android:layout_marginBottom="16dp" />
     </FrameLayout>
+    <!-- TabLayout -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:tabIndicatorColor="#F7841E"
+        app:tabSelectedTextColor="#F7841E"
+        app:tabTextColor="@android:color/white"
+        android:background="@color/black" />
 
     <!-- Horizontal Layout for Text and RecyclerView -->
     <LinearLayout
@@ -94,10 +103,18 @@
                 android:layout_height="3dp" />
         </androidx.appcompat.widget.LinearLayoutCompat>
 
+        <!-- RecyclerView 1 (for Comics) -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycle_comic"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+
+        <!-- RecyclerView 2 (for Deuat) -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycle_dexuat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
     </LinearLayout>
 
 </LinearLayout>

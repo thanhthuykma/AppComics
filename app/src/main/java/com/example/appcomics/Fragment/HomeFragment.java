@@ -17,7 +17,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -34,6 +33,7 @@ import com.example.appcomics.Model.ComicCountResponse;
 import com.example.appcomics.R;
 import com.example.appcomics.retrofit.IComicAPI;
 import com.example.appcomics.retrofit.RetrofitClient;
+import com.google.android.material.tabs.TabLayout;
 import com.tbuonomo.viewpagerdotsindicator.DotsIndicator;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +49,7 @@ public class HomeFragment extends Fragment {
     private ViewPager2 viewPager2;
     private SliderAdapter sliderAdapter;
     private RecyclerView recyclerView;
+    private RecyclerView recyclerViewRe;
     private ComicAdapter comicAdapter;
     private DotsIndicator dotsIndicator;
     private String username;
@@ -81,7 +82,14 @@ public class HomeFragment extends Fragment {
         viewPager2 = view.findViewById(R.id.view_pager);
         dotsIndicator = view.findViewById(R.id.dots_indicator);
         recyclerView = view.findViewById(R.id.recycle_comic);
+        recyclerViewRe = view.findViewById(R.id.recycle_dexuat);
+        recyclerViewRe.setLayoutManager(new GridLayoutManager(getContext(), 2));
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        text_comic = view.findViewById(R.id.text_comic);
+        TabLayout tabLayout = view.findViewById(R.id.tab_layout);
+        //Thêm hai tab và đặt tab "Truyện mới" làm mặc định
+        tabLayout.addTab(tabLayout.newTab().setText("Truyện mới").setTag("NEW"), true);
+        tabLayout.addTab(tabLayout.newTab().setText("Đề xuất").setTag("RECOMMEND"));
 
         // Get username from arguments
         if (getArguments() != null) {
@@ -163,14 +171,36 @@ public class HomeFragment extends Fragment {
 
         // Initialize API
         iComicAPI = RetrofitClient.getClient().create(IComicAPI.class);
-
-
-        // Fetch banner and comics
         fetchBanner();
+        // Mặc định hiển thị RecyclerView truyện mới
+        recyclerView.setVisibility(View.VISIBLE);
+        recyclerViewRe.setVisibility(View.GONE);
         fetchComics();
-        //Đếm số truyệntranh
-        text_comic = view.findViewById(R.id.text_comic);
         getComicsize();
+        // Lắng nghe sự kiện chọn tab
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                String tag = tab.getTag().toString();
+                if (tag.equals("NEW")) {
+                    recyclerView.setVisibility(View.VISIBLE);
+                    recyclerViewRe.setVisibility(View.GONE);
+                    fetchComics();
+                    //Đếm số truyệntranh
+                    getComicsize();
+                } else if (tag.equals("RECOMMEND")) {
+                    recyclerView.setVisibility(View.GONE);
+                    recyclerViewRe.setVisibility(View.VISIBLE);
+                    fetchReComics();
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
+        });
 
         return view;
     }
@@ -291,6 +321,35 @@ public class HomeFragment extends Fragment {
             }
         });
     }
+    private void fetchReComics() {
+        if (progressDialog == null) {
+            progressDialog = new ProgressDialog(getContext());
+            progressDialog.setMessage("Please Wait...");
+            progressDialog.setCancelable(false);
+        }
+        progressDialog.show();
+
+        iComicAPI.getRecommendations(username).enqueue(new Callback<List<Comic>>() {
+            @Override
+            public void onResponse(Call<List<Comic>> call, Response<List<Comic>> response) {
+                progressDialog.dismiss();
+                if (response.isSuccessful()) {
+                    List<Comic> comics = response.body();
+                    comicAdapter = new ComicAdapter(getContext(), comics, username);
+                    recyclerViewRe.setAdapter(comicAdapter);
+                    text_comic.setText("TRUYỆN ĐỀ XUẤT ("+ comics.size() + ")");
+                } else {
+                    Toast.makeText(getContext(), "Failed to load comics", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Comic>> call, Throwable t) {
+                progressDialog.dismiss();
+                Toast.makeText(getContext(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
     //Lây số truyện tranh
     private void getComicsize() {
         iComicAPI.getComicsize().enqueue(new Callback<List<ComicCountResponse>>() {
@@ -298,15 +357,15 @@ public class HomeFragment extends Fragment {
             public void onResponse(Call<List<ComicCountResponse>> call, Response<List<ComicCountResponse>> response) {
                 if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                     int count = response.body().get(0).getCount();
-                    text_comic.setText("NEW COMIC (" + count + ")");
+                    text_comic.setText("TRUYỆN MỚI (" + count + ")");
                 } else {
-                    text_comic.setText("NEW COMIC (0)"); // Hiển thị 0 nếu không có dữ liệu
+                    text_comic.setText("TRUYỆN MỚI (0)"); // Hiển thị 0 nếu không có dữ liệu
                 }
             }
 
             @Override
             public void onFailure(Call<List<ComicCountResponse>> call, Throwable t) {
-                text_comic.setText("NEW COMIC (0)"); // Hiển thị 0 trong trường hợp lỗi
+                text_comic.setText("TRUYỆN MỚI (0)"); // Hiển thị 0 trong trường hợp lỗi
                 Toast.makeText(getContext(), "Failed to get comic count: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
