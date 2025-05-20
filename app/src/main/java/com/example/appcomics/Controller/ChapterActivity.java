@@ -233,6 +233,7 @@ public class ChapterActivity extends AppCompatActivity {
                                                 values.put(DatabaseHelper.COLUMN_TAC_GIA, finalTacgia);
                                                 values.put(DatabaseHelper.COLUMN_VIEWS, finalViews);
                                                 values.put(DatabaseHelper.COLUMN_IMAGES, finalHistoryImage);
+                                                values.put(DatabaseHelper.COLUMN_MANGA_NAME, name);
 
                                                 long result = db.insert(DatabaseHelper.TABLE_DOWNLOADS, null, values);
                                                 if (result != -1) {

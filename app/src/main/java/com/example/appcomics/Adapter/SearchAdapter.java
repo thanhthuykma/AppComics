@@ -1,6 +1,7 @@
 package com.example.appcomics.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.appcomics.Controller.StoryIntroActivity;
 import com.example.appcomics.Model.Comic;
 import com.example.appcomics.Model.Comic1;
 import com.example.appcomics.R;
@@ -39,6 +41,19 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
     public void onBindViewHolder(@NonNull SearchViewHolder holder, int position) {
         Comic1 comic = comicList.get(position);
         holder.bind(comic);
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, StoryIntroActivity.class);
+                intent.putExtra("mangaid",comic.getID());
+                intent.putExtra("name",comic.getName());
+                intent.putExtra("username",comic.getName());
+                intent.putExtra("imagehistory",comic.getImage());
+                intent.putExtra("views",comic.getViews());
+                intent.putExtra("source","comic");
+                context.startActivity(intent);
+            }
+        });
     }
 
     @Override

@@ -30,6 +30,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_VIEWS = "views";
     public static final String COLUMN_IMAGES = "image";
     public static final String COLUMN_AUDIO_FILE = "audiofile";
+    public static final String COLUMN_MANGA_NAME = "manganame";
 
     // SQL query để tạo bảng
     private static final String CREATE_DOWNLOADS_TABLE = "CREATE TABLE " + TABLE_DOWNLOADS + "("
@@ -41,6 +42,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + COLUMN_VIEWS + " INTEGER,"
             + COLUMN_IMAGES + " TEXT,"
             + COLUMN_AUDIO_FILE + " BLOB,"
+            + COLUMN_MANGA_NAME + " TEXT,"
             + COLUMN_CONTENT + " TEXT)";
 
     // Constructor

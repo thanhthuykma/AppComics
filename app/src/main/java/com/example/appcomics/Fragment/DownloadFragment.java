@@ -87,7 +87,7 @@ public class DownloadFragment extends Fragment {
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 int mangaid = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_MANGAID));
-                String manganame = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_CHAPTER_TITLE));
+                String manganame = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_MANGA_NAME));
                 int views = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_VIEWS));
                 String image = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_IMAGES));
                 String tacgia = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_TAC_GIA));
