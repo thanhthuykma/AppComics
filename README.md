@@ -26,12 +26,12 @@ App đọc truyện tích hợp AI Text-to-Speech với các chức năng:
 -Hiện thông tin truyện <br>
 ![image](https://github.com/user-attachments/assets/60b5ca32-4459-4fa1-8a9f-70049e3dee07)
 
--Cho phép người dùng xem các chương truyện và theo dõi phần trăm hoàn thành việc đọc từng chương
+-Cho phép người dùng xem các chương truyện và theo dõi phần trăm hoàn thành việc đọc từng chương <br>
 ![image](https://github.com/user-attachments/assets/bd588645-1cf4-419f-9e4e-6c264133acd3)
 
 -Có đánh dấu vị trí người dùng đọc dở <br>
 ![image](https://github.com/user-attachments/assets/31a81c2e-47dd-42fc-a972-c545edb70bba)
--Nghe truyện được tạo bằng AI Text-to-Speech
+-Nghe truyện được tạo bằng AI Text-to-Speech <br>
 ![image](https://github.com/user-attachments/assets/12fc6507-e095-43e5-a73d-5d6c51434e11)
 
 6.Chức năng yêu thích truyện <br>
@@ -40,7 +40,7 @@ App đọc truyện tích hợp AI Text-to-Speech với các chức năng:
 
 7.Chức năng xem lịch sử truyện đã đọc <br>
 -Khi người dùng chọn 1 truyện để đọc, truyện sẽ được thêm vào mục lịch sử đọc <br>
-8. Chức năng đề xuất truyện cho người dùng
+8. Chức năng đề xuất truyện cho người dùng <br>
 ![image](https://github.com/user-attachments/assets/56110640-1aed-4fac-967c-1abd571f2048)
 
 9.Chức năng bình luận truyện <br>
