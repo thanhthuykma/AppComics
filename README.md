@@ -31,6 +31,7 @@ App đọc truyện tích hợp AI Text-to-Speech với các chức năng:
 
 -Có đánh dấu vị trí người dùng đọc dở <br>
 ![image](https://github.com/user-attachments/assets/31a81c2e-47dd-42fc-a972-c545edb70bba)
+
 -Nghe truyện được tạo bằng AI Text-to-Speech <br>
 ![image](https://github.com/user-attachments/assets/12fc6507-e095-43e5-a73d-5d6c51434e11)
 
