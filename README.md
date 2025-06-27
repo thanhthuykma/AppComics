@@ -1,7 +1,6 @@
 
-App đọc truyện tích hợp AI Text-to-Speech với các chức năng:
-
-![image](https://github.com/user-attachments/assets/0f88304c-9c9a-456a-9c54-fb4d345c576a)
+App đọc truyện tích hợp AI Text-to-Speech với các chức năng: <br>
+![image](https://github.com/user-attachments/assets/f06828b5-9898-46ed-8597-7bd296aacf25)
 
 1.Đăng nhập  <br>
 -Người dùng có thể đăng nhập bằng tài khoản đã đăng ký. <br>
