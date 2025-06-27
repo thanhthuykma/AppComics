@@ -1,5 +1,5 @@
 
-App đọc truyện tranh với các chức năng:
+App đọc truyện tích hợp AI Text-to-Speech với các chức năng:
 
 ![image](https://github.com/user-attachments/assets/0f88304c-9c9a-456a-9c54-fb4d345c576a)
 
